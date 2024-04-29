@@ -6,14 +6,16 @@ import kotlinx.serialization.json.Json
 class CreateWallet : CliktCommand(help = "Creates a new wallet") {
     private val walletName: String by argument(help = "Name of the wallet to create")
 
-    private val clientConfig: ClientConfig by lazy {
-        requireNotNull(currentContext.findObject() as? ClientConfig) {
+    private val appContext: AppContext by lazy {
+        requireNotNull(currentContext.findObject() as? AppContext) {
             "ClientConfig not found in context"
         }
     }
 
     override fun run() {
-        println("Wallet '$walletName' has been created successfully.")
+
+        val clientConfig = appContext.clientConfig;
+        val sqliteManager = appContext.sqliteManager;
 
         var mnemonic: String? = null
 
@@ -35,6 +37,7 @@ class CreateWallet : CliktCommand(help = "Creates a new wallet") {
 
         if (infoConfig == null) {
             println("ERROR: infoConfig is null.")
+            return
         }
 
         val electrumClient = getElectrumClient(clientConfig)
@@ -86,11 +89,8 @@ class CreateWallet : CliktCommand(help = "Creates a new wallet") {
             settings
         )
 
-        val jsonWallet = Json.encodeToString(Wallet.serializer(), wallet)
-        println(jsonWallet)
+        sqliteManager.insertWallet(wallet);
 
-
-
-
+        println("Wallet '$walletName' has been created successfully.")
     }
 }

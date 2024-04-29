@@ -21,6 +21,7 @@ import com.sun.jna.Native
 import com.sun.jna.Pointer
 import com.sun.jna.Structure
 import com.sun.jna.ptr.*
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -1620,10 +1621,14 @@ public object FfiConverterTypeStatechainBackupTxs : FfiConverterRustBuffer<State
 
 @Serializable
 data class Token(
+	@SerialName("btc_payment_address")
     var `btcPaymentAddress`: kotlin.String,
     var `fee`: kotlin.String,
+	@SerialName("lightning_invoice")
     var `lightningInvoice`: kotlin.String,
+	@SerialName("processor_id")
     var `processorId`: kotlin.String,
+	@SerialName("token_id")
     var `tokenId`: kotlin.String,
     var `confirmed`: kotlin.Boolean,
     var `spent`: kotlin.Boolean,
@@ -1812,7 +1817,7 @@ public object FfiConverterTypeMercuryError : FfiConverterRustBuffer<MercuryExcep
         value: MercuryException,
         buf: ByteBuffer,
     ) {
-            when (value) {
+        when (value) {
             is MercuryException.Bip39Exception -> {
                 buf.putInt(1)
                 Unit

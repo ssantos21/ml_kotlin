@@ -28,9 +28,10 @@ dependencies {
     implementation("io.ktor:ktor-client-content-negotiation:$ktor_version")
     implementation("io.ktor:ktor-serialization-kotlinx-json:$ktor_version")
     implementation("org.slf4j:slf4j-nop:2.1.0-alpha1")
+    implementation("org.slf4j:slf4j-api:2.1.0-alpha1")
     // implementation("org.bitcoindevkit:bdk-jvm:1.0.0-alpha.9")
     implementation("com.github.spindj:electrumj:11eb7ceef7")
-
+    implementation("org.xerial:sqlite-jdbc:3.45.3.0")
 }
 
 tasks.test {

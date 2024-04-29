@@ -10,6 +10,7 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.serialization.kotlinx.json.*
 import org.electrumj.ElectrumClient
+import java.sql.DriverManager
 
 fun splitUrl(electrumServerUrl: String): Triple<String, String, Int> {
     val protocolEndIndex = electrumServerUrl.indexOf("://")
@@ -82,14 +83,21 @@ suspend fun getInfoConfig(clientConfig: ClientConfig): InfoConfig {
     )
 }
 
+data class AppContext(
+    val clientConfig: ClientConfig,
+    val sqliteManager: SqliteManager
+)
+
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 class MainCommand : CliktCommand() {
-    private val clientConfig = ClientConfig()  // File check will occur here
+    private val clientConfig = ClientConfig()
+    private val sqliteManager = SqliteManager(clientConfig)
 
     init {
+
         context {
-            obj = clientConfig
+            obj = AppContext(clientConfig, sqliteManager)
         }
     }
 
@@ -97,7 +105,7 @@ class MainCommand : CliktCommand() {
 }
 
 fun main(args: Array<String>) = MainCommand()
-    .subcommands(CreateWallet(), NewToken())
+    .subcommands(CreateWallet(), Deposit())
     .main(args)
 
 /*

@@ -32,7 +32,7 @@ class ClientConfig {
     val electrumType: String
     val network: String
 //    val feeRateTolerance: Int
-//    val databaseFile: String
+    val databaseFile: String
 //    val confirmationTarget: Int
 
     init {
@@ -58,5 +58,6 @@ class ClientConfig {
         electrumServer = configData.electrumServer
         electrumType = configData.electrumType
         network = configData.network
+        databaseFile = configData.databaseFile
     }
 }
