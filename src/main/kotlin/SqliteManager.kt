@@ -1,3 +1,4 @@
+import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import java.sql.DriverManager
 
@@ -55,6 +56,19 @@ class SqliteManager(clientConfig: ClientConfig) {
             conn.prepareStatement("UPDATE wallet SET wallet_json = ? WHERE wallet_name = ?").use { statement ->
                 statement.setString(1, walletJson)
                 statement.setString(2, wallet.name)
+                statement.executeUpdate()
+            }
+        }
+    }
+
+    fun insertBackupTxs(statechainId: String, listBackupTx: List<BackupTx>) {
+
+        val listBackupTxJson = Json.encodeToString(ListSerializer(BackupTx.serializer()), listBackupTx)
+
+        DriverManager.getConnection(databaseUrl).use { conn ->
+            conn.prepareStatement("INSERT INTO backup_txs (statechain_id, txs) VALUES (?, ?)").use { statement ->
+                statement.setString(1, statechainId)
+                statement.setString(2, listBackupTxJson)
                 statement.executeUpdate()
             }
         }

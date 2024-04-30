@@ -94,13 +94,13 @@ class CoinUpdate() {
             }
         }*/
 
-        private suspend fun checkDeposit(coin: Coin, clientConfig: ClientConfig, walletNetwork: String) {
+        private suspend fun checkDeposit(coin: Coin, clientConfig: ClientConfig, walletNetwork: String): DepositResult? {
 
             if (coin.statechainId == null && coin.utxoTxid == null && coin.utxoVout == null) {
                 if (coin.status != CoinStatus.INITIALISED) {
                     throw IllegalStateException("Coin does not have a statechain ID, a UTXO and the status is not INITIALISED")
                 } else {
-                    return
+                    return null
                 }
             }
 
@@ -125,11 +125,11 @@ class CoinUpdate() {
             }
 
             if (utxo == null) {
-                return;
+                return null
             }
 
             if (utxo!!.height == 0.toLong() && coin.status == CoinStatus.IN_MEMPOOL) {
-                return;
+                return null
             }
 
             val blockHeader = electrumClient.blockchainHeadersSubscribe()
@@ -161,6 +161,8 @@ class CoinUpdate() {
                     coin.status = CoinStatus.CONFIRMED
                 }
             }
+
+            return depositResult
         }
 
 
@@ -173,9 +175,16 @@ class CoinUpdate() {
 
             wallet.coins.forEach { coin ->
                 if (coin.status == CoinStatus.INITIALISED || coin.status == CoinStatus.IN_MEMPOOL || coin.status == CoinStatus.UNCONFIRMED) {
-                    checkDeposit(coin, clientConfig, wallet.network)
+                    var depositResult = checkDeposit(coin, clientConfig, wallet.network)
+
+                    if (depositResult != null) {
+                        wallet.activities = wallet.activities.plus(depositResult.activity)
+                        sqliteManager.insertBackupTxs(coin.statechainId!!, listOf(depositResult.backupTx))
+                    }
                 }
             }
+
+            sqliteManager.updateWallet(wallet)
         }
     }
 }
