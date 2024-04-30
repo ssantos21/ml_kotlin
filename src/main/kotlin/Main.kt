@@ -11,6 +11,20 @@ import io.ktor.client.statement.*
 import io.ktor.serialization.kotlinx.json.*
 import org.electrumj.ElectrumClient
 import java.sql.DriverManager
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
+
+fun createActivity(utxo: String, amount: UInt, action: String): Activity {
+    val date = ZonedDateTime.now() // This will get the current date and time in UTC
+    val isoString = date.format(DateTimeFormatter.ISO_ZONED_DATE_TIME) // Converts the date to an ISO 8601 string
+
+    return Activity(
+        utxo = utxo,
+        amount = amount,
+        action = action,
+        date = isoString
+    )
+}
 
 fun splitUrl(electrumServerUrl: String): Triple<String, String, Int> {
     val protocolEndIndex = electrumServerUrl.indexOf("://")

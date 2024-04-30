@@ -78,6 +78,8 @@ class Deposit: CliktCommand(help = "Generates a new deposit address", name = "ne
             setBody(depositMsg1)
         }.body()
 
+        httpClient.close()
+
         val depositInitResult = handleDepositMsg1Response(coin, depositMsg1Response)
 
         coin.statechainId = depositInitResult.statechainId;
