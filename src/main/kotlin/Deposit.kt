@@ -10,6 +10,11 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
+import kotlinx.serialization.json.putJsonObject
 
 class Deposit: CliktCommand(help = "Generates a new deposit address", name = "new-deposit-address") {
 
@@ -55,9 +60,9 @@ class Deposit: CliktCommand(help = "Generates a new deposit address", name = "ne
         appContext.sqliteManager.updateWallet(wallet)
     }
 
-    private suspend fun init(wallet: Wallet, token: Token, amount: UInt) {
+    private suspend fun execute(wallet: Wallet, token: Token, amount: UInt) {
 
-        var coin = getNewCoin(wallet)
+        val coin = getNewCoin(wallet)
         wallet.coins = wallet.coins.plus(coin)
 
         appContext.sqliteManager.updateWallet(wallet)
@@ -89,7 +94,16 @@ class Deposit: CliktCommand(help = "Generates a new deposit address", name = "ne
         coin.aggregatedAddress = aggregatedPublicKey.aggregateAddress;
         coin.aggregatedPubkey = aggregatedPublicKey.aggregatePubkey;
 
+        token.spent = true
+
         appContext.sqliteManager.updateWallet(wallet)
+
+        val json = buildJsonObject {
+            put("deposit_address", coin.aggregatedAddress!!)
+            put("statechain_id", coin.statechainId!!)
+        }
+
+        println(Json.encodeToString(json))
     }
 
     override fun run() {
@@ -104,11 +118,7 @@ class Deposit: CliktCommand(help = "Generates a new deposit address", name = "ne
                 throw Exception("There is no token available")
             }
 
-            init(wallet, foundToken, amount)
-
-            foundToken.spent = true
+            execute(wallet, foundToken, amount)
         }
-
-        println("A new token has been added to wallet ${wallet.name}.")
     }
 }

@@ -107,26 +107,3 @@ class MainCommand : CliktCommand() {
 fun main(args: Array<String>) = MainCommand()
     .subcommands(CreateWallet(), Deposit())
     .main(args)
-
-/*
-fun main() {
-    val name = "Kotlin"
-    //TIP Press <shortcut actionId="ShowIntentionActions"/> with your caret at the highlighted text
-    // to see how IntelliJ IDEA suggests fixing it.
-    println("Hello, " + name + "!")
-
-    for (i in 1..5) {
-        //TIP Press <shortcut actionId="Debug"/> to start debugging your code. We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/> breakpoint
-        // for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>.
-        println("i = $i")
-    }
-
-    try {
-        val mnemonic = generateMnemonic()
-        println("Generated Mnemonic: $mnemonic")
-    } catch (e: MercuryException) {
-        println("Failed to generate mnemonic: ${e.message}")
-    }
-
-}
- */
