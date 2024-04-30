@@ -25,10 +25,10 @@ class ListStatecoins: CliktCommand(help = "List all wallet' statecoins") {
                 putJsonArray("coins") {
                     wallet.coins.forEach { coin ->
                         add(buildJsonObject {
-                            put("statechain_id", coin.statechainId!!)
+                            put("statechain_id", coin.statechainId ?: "Empty")
                             put("amount", coin.amount.toString())
                             put("status", coin.status.toString())
-                            put("deposit_address", coin.aggregatedAddress!!)
+                            put("deposit_address", coin.aggregatedAddress ?: "Empty")
                         })
                     }
                 }
