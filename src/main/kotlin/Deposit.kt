@@ -35,7 +35,6 @@ class Deposit: CliktCommand(help = "Generates a new deposit address", name = "ne
 
         val url = clientConfig.statechainEntity + "/" + endpoint;
 
-        // val client = HttpClient(CIO)
         val httpClient = HttpClient(CIO) {
             install(ContentNegotiation) {
                 json()
@@ -44,18 +43,15 @@ class Deposit: CliktCommand(help = "Generates a new deposit address", name = "ne
 
         val token: Token = httpClient.get(url).body();
 
-        println("token.tokenId: " + token.tokenId);
+        httpClient.close()
 
         return token
-
     }
 
     private suspend fun addTokenToWallet(wallet: Wallet) {
         val token = getTokenFromServer()
         token.confirmed = true
         wallet.tokens = wallet.tokens.plus(token)
-
-        println("wallet.tokens.count: ${wallet.tokens.count()}")
 
         appContext.sqliteManager.updateWallet(wallet)
     }

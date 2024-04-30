@@ -62,7 +62,7 @@ suspend fun getInfoConfig(clientConfig: ClientConfig): InfoConfig {
 
     val serverConfig: ServerConfig = httpClient.get(url).body();
 
-    httpClient.close();
+    httpClient.close()
 
     val electrumClient = getElectrumClient(clientConfig)
 
@@ -105,5 +105,5 @@ class MainCommand : CliktCommand() {
 }
 
 fun main(args: Array<String>) = MainCommand()
-    .subcommands(CreateWallet(), Deposit())
+    .subcommands(CreateWallet(), Deposit(), ListStatecoins())
     .main(args)
