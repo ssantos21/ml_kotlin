@@ -1,10 +1,7 @@
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.arguments.argument
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.put
-import kotlinx.serialization.json.putJsonArray
-import kotlinx.serialization.json.putJsonObject
+import kotlinx.serialization.json.*
 
 class ListStatecoins: CliktCommand(help = "List all wallet' statecoins") {
 
@@ -37,7 +34,8 @@ class ListStatecoins: CliktCommand(help = "List all wallet' statecoins") {
                 }
             }
 
-            println(resultJson)
+            val prettyJsonString = Json { prettyPrint = true }.encodeToString(JsonObject.serializer(), resultJson)
+            println(prettyJsonString)
         }
     }
 }

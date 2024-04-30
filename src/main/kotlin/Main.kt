@@ -119,5 +119,5 @@ class MainCommand : CliktCommand() {
 }
 
 fun main(args: Array<String>) = MainCommand()
-    .subcommands(CreateWallet(), Deposit(), ListStatecoins(), Withdraw())
+    .subcommands(CreateWallet(), Deposit(), ListStatecoins(), Withdraw(), BroadcastBackupTransaction())
     .main(args)

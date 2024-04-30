@@ -8,7 +8,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 
-class Withdraw: CliktCommand(help = "Generates a new deposit address") {
+class Withdraw: CliktCommand(help = "Withdraw funds from a statecoin to a BTC address") {
 
     private val walletName: String by argument(help = "Name of the wallet")
 
