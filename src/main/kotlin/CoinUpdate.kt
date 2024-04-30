@@ -113,10 +113,7 @@ class CoinUpdate() {
             val responseEntries: List<BlockchainScripthashListUnspentResponseEntry> =
                 electrumClient.blockchainScripthashListUnspent(scripthash)
 
-
             var utxo: BlockchainScripthashListUnspentResponseEntry? = null;
-
-            println("responseEntries.count: ${responseEntries.count()}")
 
             responseEntries.forEach { entry ->
                 if (entry.value == coin.amount!!.toLong()) {
@@ -165,6 +162,62 @@ class CoinUpdate() {
             return depositResult
         }
 
+        private fun checkWithdrawal(coin: Coin, clientConfig: ClientConfig, walletNetwork: String): Boolean {
+
+            var txid: String? = null
+
+            if (coin.txWithdraw != null) {
+                txid = coin.txWithdraw
+            }
+
+            if (coin.txCpfp != null) {
+                if (txid != null) {
+                    throw Exception("Coin ${coin.aggregatedAddress} has both txWithdraw and txCpfp")
+                }
+                txid = coin.txCpfp
+            }
+
+            if (txid == null) {
+                throw Exception("Coin ${coin.aggregatedAddress} has neither txWithdraw nor txCpfp")
+            }
+
+            if (coin.withdrawalAddress == null) {
+                throw Exception("Coin ${coin.aggregatedAddress} has no withdrawalAddress")
+            }
+
+            val electrumClient = getElectrumClient(clientConfig)
+
+            // TODO: check wallet network
+            val netParam = NetworkParameters.fromID(NetworkParameters.ID_TESTNET)
+            val scripthash: String = Util.scripthash(netParam, coin.withdrawalAddress!!)
+
+            val responseEntries: List<BlockchainScripthashListUnspentResponseEntry> =
+                electrumClient.blockchainScripthashListUnspent(scripthash)
+
+            var utxo: BlockchainScripthashListUnspentResponseEntry? = null;
+
+            responseEntries.forEach { entry ->
+                if (entry.txHash == txid) {
+                    utxo = entry
+                }
+            }
+
+            if (utxo == null) {
+                return false
+            }
+
+            val blockHeader = electrumClient.blockchainHeadersSubscribe()
+            val blockheight = blockHeader.height.toUInt()
+
+            electrumClient.closeConnection()
+
+            if (utxo!!.height > 0) {
+                val confirmations = blockheight - utxo!!.height.toUInt() + 1u
+                return confirmations >= clientConfig.confirmationTarget.toUInt()
+            }
+
+            return false
+        }
 
         suspend fun execute(wallet: Wallet, appContext: AppContext) {
 
@@ -175,11 +228,18 @@ class CoinUpdate() {
 
             wallet.coins.forEach { coin ->
                 if (coin.status == CoinStatus.INITIALISED || coin.status == CoinStatus.IN_MEMPOOL || coin.status == CoinStatus.UNCONFIRMED) {
-                    var depositResult = checkDeposit(coin, clientConfig, wallet.network)
+                    val depositResult = checkDeposit(coin, clientConfig, wallet.network)
 
                     if (depositResult != null) {
                         wallet.activities = wallet.activities.plus(depositResult.activity)
                         sqliteManager.insertBackupTxs(coin.statechainId!!, listOf(depositResult.backupTx))
+                    }
+                }
+                else if (coin.status == CoinStatus.WITHDRAWING) {
+                    val isWithdrawn = checkWithdrawal(coin, clientConfig, wallet.network)
+
+                    if (isWithdrawn) {
+                        coin.status = CoinStatus.WITHDRAWN;
                     }
                 }
             }

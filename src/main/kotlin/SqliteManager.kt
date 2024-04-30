@@ -73,4 +73,33 @@ class SqliteManager(clientConfig: ClientConfig) {
             }
         }
     }
+
+    fun getBackupTxs(statechainId: String): List<BackupTx> {
+        DriverManager.getConnection(databaseUrl).use { conn ->
+            conn.prepareStatement("SELECT txs FROM backup_txs WHERE statechain_id = ?").use { statement ->
+                statement.setString(1, statechainId)
+                val rs = statement.executeQuery()
+                if (rs.next()) {
+                    val txsJson = rs.getString("txs");
+                    val backupTxs = Json.decodeFromString(ListSerializer(BackupTx.serializer()), txsJson)
+                    return backupTxs
+                } else {
+                    throw InternalException("StatechainId $statechainId not found !")
+                }
+            }
+        }
+    }
+
+    fun updateBackupTxs(statechainId: String, listBackupTx: List<BackupTx>) {
+
+        val listBackupTxJson = Json.encodeToString(ListSerializer(BackupTx.serializer()), listBackupTx)
+
+        DriverManager.getConnection(databaseUrl).use { conn ->
+            conn.prepareStatement("UPDATE backup_txs SET txs = ? WHERE statechain_id = ?").use { statement ->
+                statement.setString(1, listBackupTxJson)
+                statement.setString(2, statechainId)
+                statement.executeUpdate()
+            }
+        }
+    }
 }
