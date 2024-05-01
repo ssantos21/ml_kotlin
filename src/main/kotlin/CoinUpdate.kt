@@ -1,3 +1,9 @@
+import io.ktor.client.*
+import io.ktor.client.call.*
+import io.ktor.client.engine.cio.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.request.*
+import io.ktor.serialization.kotlinx.json.*
 import org.bitcoinj.core.NetworkParameters
 import org.electrumj.Util
 import org.electrumj.dto.BlockchainScripthashListUnspentResponseEntry
@@ -162,6 +168,22 @@ class CoinUpdate() {
             return depositResult
         }
 
+        private suspend fun checkTransfer(coin: Coin, clientConfig: ClientConfig): Boolean {
+            val url = "${clientConfig.statechainEntity}/transfer/receiver/${coin.statechainId}"
+
+            val httpClient = HttpClient(CIO) {
+                install(ContentNegotiation) {
+                    json()
+                }
+            }
+
+            val response: TransferReceiverGetResponsePayload = httpClient.get(url).body()
+
+            httpClient.close()
+
+            return response.transferComplete
+        }
+
         private fun checkWithdrawal(coin: Coin, clientConfig: ClientConfig, walletNetwork: String): Boolean {
 
             var txid: String? = null
@@ -233,6 +255,13 @@ class CoinUpdate() {
                     if (depositResult != null) {
                         wallet.activities = wallet.activities.plus(depositResult.activity)
                         sqliteManager.insertBackupTxs(coin.statechainId!!, listOf(depositResult.backupTx))
+                    }
+                }
+                else if (coin.status == CoinStatus.IN_TRANSFER) {
+                    val isTransferred = checkTransfer(coin, clientConfig)
+
+                    if (isTransferred) {
+                        coin.status = CoinStatus.TRANSFERRED;
                     }
                 }
                 else if (coin.status == CoinStatus.WITHDRAWING) {
