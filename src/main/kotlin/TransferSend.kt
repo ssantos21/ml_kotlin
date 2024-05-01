@@ -163,6 +163,7 @@ class TransferSend: CliktCommand(help = "Send the specified coin to an statechai
         val activity = createActivity(activityUtxo, coin.amount!!, "Transfer")
 
         wallet.activities = wallet.activities.plus(activity)
+        coin.status = CoinStatus.IN_TRANSFER
 
         appContext.sqliteManager.updateWallet(wallet)
 
