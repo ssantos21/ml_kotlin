@@ -125,6 +125,7 @@ fun main(args: Array<String>) = MainCommand()
         ListStatecoins(),
         Withdraw(),
         BroadcastBackupTransaction(),
-        NewTransferAddress()
+        NewTransferAddress(),
+        TransferSend()
     )
     .main(args)

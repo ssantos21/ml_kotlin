@@ -33,7 +33,7 @@ class BroadcastBackupTransaction: CliktCommand(help = "Broadcast a backup transa
             throw Exception("Invalid address")
         }
 
-        var backupTxs = appContext.sqliteManager.getBackupTxs(statechainId)
+        val backupTxs = appContext.sqliteManager.getBackupTxs(statechainId)
 
         val backupTx = if (backupTxs.isEmpty()) null else backupTxs.maxByOrNull { it.txN }
 

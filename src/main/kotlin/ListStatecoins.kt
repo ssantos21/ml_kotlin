@@ -29,6 +29,7 @@ class ListStatecoins: CliktCommand(help = "List all wallet' statecoins") {
                             put("amount", coin.amount.toString())
                             put("status", coin.status.toString())
                             put("deposit_address", coin.aggregatedAddress ?: "Empty")
+                            put("statechain_address", coin.address ?: "Empty")
                         })
                     }
                 }
