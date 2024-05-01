@@ -41,7 +41,7 @@ class Deposit: CliktCommand(help = "Generates a new deposit address", name = "ne
             }
         }
 
-        val token: Token = httpClient.get(url).body();
+        val token: Token = httpClient.get(url).body()
 
         httpClient.close()
 

@@ -7,10 +7,8 @@ import io.ktor.client.call.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
-import io.ktor.client.statement.*
 import io.ktor.serialization.kotlinx.json.*
 import org.electrumj.ElectrumClient
-import java.sql.DriverManager
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
@@ -74,7 +72,7 @@ suspend fun getInfoConfig(clientConfig: ClientConfig): InfoConfig {
         }
     }
 
-    val serverConfig: ServerConfig = httpClient.get(url).body();
+    val serverConfig: ServerConfig = httpClient.get(url).body()
 
     httpClient.close()
 
@@ -126,6 +124,7 @@ fun main(args: Array<String>) = MainCommand()
         Withdraw(),
         BroadcastBackupTransaction(),
         NewTransferAddress(),
-        TransferSend()
+        TransferSend(),
+        TransferReceive()
     )
     .main(args)

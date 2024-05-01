@@ -102,4 +102,23 @@ class SqliteManager(clientConfig: ClientConfig) {
             }
         }
     }
+
+    fun insertOrUpdateBackupTxs(statechainId: String, listBackupTx: List<BackupTx>) {
+
+        DriverManager.getConnection(databaseUrl).use { conn ->
+            conn.prepareStatement("DELETE FROM backup_txs WHERE statechain_id = ?").use { statement ->
+                statement.setString(1, statechainId)
+                statement.executeUpdate()
+            }
+
+            val listBackupTxJson = Json.encodeToString(ListSerializer(BackupTx.serializer()), listBackupTx)
+
+            conn.prepareStatement("INSERT INTO backup_txs (statechain_id, txs) VALUES (?, ?)").use { statement ->
+                statement.setString(1, statechainId)
+                statement.setString(2, listBackupTxJson)
+                statement.executeUpdate()
+            }
+        }
+
+    }
 }
